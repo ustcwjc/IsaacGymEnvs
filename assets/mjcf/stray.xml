@@ -1,0 +1,203 @@
+<mujoco model="Stray">
+  <compiler inertiafromgeom="false" angle="degree" eulerseq="xyz" meshdir="../meshes" />
+  <size nuser_actuator="1" nuser_sensor="1" />
+  <option timestep="0.01" iterations="50" solver="PGS" gravity="0 0 -9.806" />
+
+
+    <visual>
+    <quality shadowsize="32768" numslices="56" />
+    <map znear="0.05" />
+    </visual>
+
+    <default>
+      <joint limited="true" />
+      <geom contype="1" conaffinity="1" condim="3" material="collision" friction="0.8 0.5 0.5" solimp="0.95 0.99 0.001 0.1 10.0" />
+      <equality solref="0.005 1" />
+      <motor ctrllimited="true" />
+      <mesh scale="1 1 1" />
+
+      <default class="mesh-import">
+          <geom type="mesh" euler="0 60 60" material="cassie" friction="0.8 0.5 0.5" solimp="0.95 0.99 0.001 0.1 10.0" />
+      </default>
+    </default>
+
+    <asset>
+        <texture type="skybox" builtin="gradient" width="128" height="128" rgb1="0.325490196078431   0.003921568627451   0.600000000000000" rgb2="0.500000000000000   0.584313725490196   0.188235294117647" />
+        <texture name="plane" type="2d" builtin="checker" rgb1="0.2 0.3 0.5" rgb2="1 1 1" width="128" height="128" />
+        <texture name="body" type="2d" builtin="checker" rgb1="0.5 0.5 0.5" rgb2="0.5 0.5 0.5" width="1024" height="1024" />
+        <material name="plane" reflectance="0.1" texture="plane" texrepeat="2 2" texuniform="true" />
+        <material name="cassie" reflectance="0.3" specular="0.1" emission="0" shininess="0.1" texture="body" texrepeat="300 300" texuniform="true" />
+        <material name="collision" rgba="0 1 0 0.1" />
+        <hfield name="terrain" nrow="20" ncol="20" size="50 50 0.01 1" />
+    </asset>
+
+    <worldbody>
+
+        <!-- <geom type="plane" size="100 100 100" material="plane" friction="0.8 0.5 0.5" solimp="0.95 0.99 0.001 0.1 10.0" solref=".02 1" /> -->
+        <light name="temp" mode="fixed" castshadow="false" directional="true" dir="-1 1 -1" active="true" pos="1 -1 9" exponent="10" />
+        <body name="front_body" pos="0.0 0 0.32">
+            <site name="bodyref" size="0.01" />
+
+            <camera name="track" mode="trackcom" pos="-0.2 -1.7 0.5" xyaxes="1 0 0 0 0.3 1" />
+
+            <inertial pos="0.17511205451695034 9.56554703452455E-06 -0.0020598932147345" mass="3.909" diaginertia="0.048522 0.019088 0.055756" />
+
+            <geom type="box" size="0.12 0.15 0.04" rgba="0.7 0.75 0.7 1" euler="0 0 0" pos="0.17 0 0" />
+
+
+            <freejoint name='root' />
+
+            <body name="hip_LF" pos='0.32 0.15 0' >
+                <inertial pos='-0.003311 -0.000635 3.1e-05' mass='0.696' diaginertia='0.000469246 0.00080749 0.000552929' />
+                <geom type='box' size='0.03 0.03 0.03' rgba='0.5 0.5 0.6 1' />
+                <joint name='hip_LF' type='hinge' pos='0 0 0' axis='1 0 0' range='-60 60' ref='0' armature='0.0001' />
+
+                <body name='thigh_LF' pos='0.03 0.04 0' euler='0 135 0'>
+                <inertial pos='0.003237 0.022327 -0.027326' mass='1.013' diaginertia='0.001367788 0.005529065 0.005139339' />
+                <geom type='box' size='0.1 0.01 0.015' rgba='0.5 0.6 0.6 1' pos='0.1 0 0' />
+                <joint name='thigh_LF' type='hinge' pos='0 0 0' axis='0 1 0' range='-60 60' ref='0' armature='0.0001' />
+
+                    <body name='calf_LF' pos='0.2 0 0' euler='0 -90 0'>
+                    <inertial pos='0.1 0 0' mass='0.03' diaginertia='0.00002743 0.00010716 0.00008016' />
+                    <geom type='box' size='0.1 0.01 0.015' rgba='0.5 0.6 0.6 1' pos='0.1 0 0' />
+                    <joint name='calf_LF' type='hinge' pos='0 0 0' axis='0 1 0' range='-60 60' ref='0' armature='0.0001' />
+
+                        <body name='foot_LF' pos='0.2 0 0' euler='0 0 0' >
+                        <inertial pos='0 0 0' mass='0.02' diaginertia='0.00000166 0.00000366 0.00000244' />
+                        <geom type='sphere' size='0.025' rgba='0.5 0.6 0.6 1' />
+                        </body>
+                    </body>
+                </body>
+            </body>
+
+            <body name="hip_RF" pos='0.32 -0.15 0' >
+                <inertial pos='-0.003311 -0.000635 3.1e-05' mass='0.696' diaginertia='0.000469246 0.00080749 0.000552929' />
+                <geom type='box' size='0.03 0.03 0.03' rgba='0.5 0.5 0.6 1' />
+                <joint name='hip_RF' type='hinge' pos='0 0 0' axis='1 0 0' range='-60 60' ref='0' armature='0.0001' />
+
+                <body name='thigh_RF' pos='0.03 -0.04 0' euler='0 135 0'>
+                <inertial pos='0.003237 0.022327 -0.027326' mass='1.013' diaginertia='0.001367788 0.005529065 0.005139339' />
+                <geom type='box' size='0.1 0.01 0.015' rgba='0.5 0.6 0.6 1' pos='0.1 0 0'  />
+                <joint name='thigh_RF' type='hinge' pos='0 0 0' axis='0 1 0' range='-60 60' ref='0' armature='0.0001' />
+
+                    <body name='calf_RF' pos='0.2 0 0' euler='0 -90 0'>
+                    <inertial pos='0.1 0 0' mass='0.03' diaginertia='0.00002743 0.00010716 0.00008016' />
+                    <geom type='box' size='0.1 0.01 0.015' rgba='0.5 0.6 0.6 1' pos='0.1 0 0' />
+                    <joint name='calf_RF' type='hinge' pos='0 0 0' axis='0 1 0' range='-60 60' ref='0' armature='0.0001' />
+
+                        <body name='foot_RF' pos='0.2 0 0' euler='0 0 0' >
+                        <inertial pos='0 0 0' mass='0.02' diaginertia='0.00000166 0.00000366 0.00000244' />
+                        <geom type='sphere' size='0.025' rgba='0.5 0.6 0.6 1' />
+                        </body>
+                    </body>
+                </body>
+            </body>
+
+            <body name='spine_roll' pos='0.02 0 0' >
+            <inertial pos='-0.003311 -0.000635 3.1e-05' mass='0.696' diaginertia='0.000469246 0.00080749 0.000552929' />
+            <geom type='box' size='0.03 0.03 0.02' rgba='0.7 0.7 0.4 1' />
+            <joint name='spine_roll' type='hinge' pos='0 0 0' axis='1 0 0' range='-45 45' ref='0' armature='0.0001' />
+
+                <body name='spine_yaw' pos='-0.05 0 0.04' >
+                <inertial pos='-0.003311 -0.000635 3.1e-05' mass='0.696' diaginertia='0.00080749 0.000552929 0.000469246' />
+                <geom type='box' size='0.04 0.03 0.02' rgba='0.7 0.7 0.9 1' />
+                <joint name='spine_yaw' type='hinge' pos='0.03 0 0' axis='0 0 1' range='-45 45' ref='0' armature='0.0001' />
+
+                    <body name='spine_pitch' pos='-0.04 0 -0.04' >
+                    <inertial pos='-0.003311 -0.000635 3.1e-05' mass='0.696' diaginertia='0.000552929 0.000469246 0.00080749' />
+                    <geom type='box' size='0.02 0.03 0.02' rgba='0.9 0.5 0.5 1' />
+                    <joint name='spine_pitch' type='hinge' pos='0.02 0 0.02' axis='0 1 0' range='-45 45' ref='0' armature='0.0001' />
+
+                        <body name='hind_body' pos='-0.1 0 0' >
+                        <geom type="box" size="0.08 0.15 0.04" rgba="0.7 0.75 0.7 1" euler="0 0 0" pos="0 0 0" />
+                        <inertial pos="0.17511205451695034 9.56554703452455E-06 -0.0020598932147345" mass="3.909" diaginertia="0.048522 0.019088 0.055756" />
+
+                            <body name='hip_LH' pos='-0.11 0.15 0' >
+                            <inertial pos='-0.003311 -0.000635 3.1e-05' mass='0.696' diaginertia='0.000469246 0.00080749 0.000552929' />
+                            <geom type='box' size='0.03 0.03 0.03' rgba='0.5 0.5 0.6 1' />
+                            <joint name='hip_LH' type='hinge' pos='0 0 0' axis='1 0 0' range='-60 60' ref='0' armature='0.0001' />
+
+                                <body name='thigh_LH' pos='-0.03 0.04 0' euler='0 135 0'>
+                                <inertial pos='0.003237 0.022327 -0.027326' mass='1.013' diaginertia='0.001367788 0.005529065 0.005139339' />
+                                <geom type='box' size='0.1 0.01 0.015' rgba='0.5 0.6 0.6 1' pos='0.1 0 0' />
+                                <joint name='thigh_LH' type='hinge' pos='0 0 0' axis='0 1 0' range='-60 60' ref='0' armature='0.0001' />
+
+                                    <body name='calf_LH' pos='0.2 0 0' euler='0 -90 0'>
+                                    <inertial pos='0.1 0 0' mass='0.03' diaginertia='0.00002743 0.00010716 0.00008016' />
+                                    <geom type='box' size='0.1 0.01 0.015' rgba='0.5 0.6 0.6 1' pos='0.1 0 0' />
+                                    <joint name='calf_LH' type='hinge' pos='0 0 0' axis='0 1 0' range='-60 60' ref='0' armature='0.0001' />
+
+                                        <body name='foot_LH' pos='0.2 0 0' euler='0 0 0' >
+                                        <inertial pos='0 0 0' mass='0.02' diaginertia='0.00000166 0.00000366 0.00000244' />
+                                        <geom type='sphere' size='0.025' rgba='0.5 0.6 0.6 1' />
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+
+                            <body name='hip_RH' pos='-0.11 -0.15 0' >
+                            <inertial pos='-0.003311 -0.000635 3.1e-05' mass='0.696' diaginertia='0.000469246 0.00080749 0.000552929' />
+                            <geom type='box' size='0.03 0.03 0.03' rgba='0.5 0.5 0.6 1' />
+                            <joint name='hip_RH' type='hinge' pos='0 0 0' axis='1 0 0' range='-60 60' ref='0' armature='0.0001' />
+
+                                <body name='thigh_RH' pos='-0.03 -0.04 0' euler='0 135 0'>
+                                <inertial pos='0.003237 0.022327 -0.027326' mass='1.013' diaginertia='0.001367788 0.005529065 0.005139339' />
+                                <geom type='box' size='0.1 0.01 0.015' rgba='0.5 0.6 0.6 1' pos='0.1 0 0' />
+                                <joint name='thigh_RH' type='hinge' pos='0 0 0' axis='0 1 0' range='-60 60' ref='0' armature='0.0001' />
+
+                                    <body name='calf_RH' pos='0.2 0 0' euler='0 -90 0'>
+                                    <inertial pos='0.1 0 0' mass='0.03' diaginertia='0.00002743 0.00010716 0.00008016' />
+                                    <geom type='box' size='0.1 0.01 0.015' rgba='0.5 0.6 0.6 1' pos='0.1 0 0' />
+                                    <joint name='calf_RH' type='hinge' pos='0 0 0' axis='0 1 0' range='-60 60' ref='0' armature='0.0001' />
+
+                                        <body name='foot_RH' pos='0.2 0 0' euler='0 0 0' >
+                                        <inertial pos='0 0 0' mass='0.02' diaginertia='0.00000166 0.00000366 0.00000244' />
+                                        <geom type='sphere' size='0.025' rgba='0.5 0.6 0.6 1' />
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+
+    <actuator>
+        <!-- <motor gear="15" joint="hip_LF" name="hip_LF" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="thigh_LF" name="thigh_LF" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="calf_LF" name="calf_LF" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="hip_RF" name="hip_RF" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="thigh_RF" name="thigh_RF" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="calf_RF" name="calf_RF" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="30" joint="spine_roll" name="spine_roll" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="30" joint="spine_yaw" name="spine_yaw" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="30" joint="spine_pitch" name="spine_pitch" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="hip_LH" name="hip_LH" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="thigh_LH" name="thigh_LH" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="calf_LH" name="calf_LH" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="hip_RH" name="hip_RH" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="thigh_RH" name="thigh_RH" ctrllimited="true" ctrlrange="-1 1" />
+        <motor gear="15" joint="calf_RH" name="calf_RH" ctrllimited="true" ctrlrange="-1 1" /> -->
+
+        <motor gear="1" joint="hip_LF" name="hip_LF" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="thigh_LF" name="thigh_LF" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="calf_LF" name="calf_LF" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="hip_RF" name="hip_RF" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="thigh_RF" name="thigh_RF" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="calf_RF" name="calf_RF" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="spine_roll" name="spine_roll" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="spine_yaw" name="spine_yaw" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="spine_pitch" name="spine_pitch" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="hip_LH" name="hip_LH" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="thigh_LH" name="thigh_LH" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="calf_LH" name="calf_LH" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="hip_RH" name="hip_RH" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="thigh_RH" name="thigh_RH" ctrllimited="true" ctrlrange="-30 30" />
+        <motor gear="1" joint="calf_RH" name="calf_RH" ctrllimited="true" ctrlrange="-30 30" />
+    </actuator>
+
+            
+
+</mujoco>

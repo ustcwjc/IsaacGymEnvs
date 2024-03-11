@@ -1,0 +1,43 @@
+import csv  # 导入csv模块
+import pandas as pd
+import numpy as np
+from mpl_toolkits.axisartist.axislines import SubplotZero
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+from matplotlib.lines import Line2D
+import matplotlib.pyplot as plt
+from scipy.interpolate import make_interp_spline
+import math
+import matplotlib.ticker as ticker
+
+
+
+filename = '/home/wong/temp/123.csv'
+header=['lin_vel_x','lin_vel_y','lin_vel_z','ang_vel_x','ang_vel_y','ang_vel_z', 'command_x', 'command_y', 'command_yaw',
+                'torque_LF_phi', 'torque_LF_len', 'torque_RF_phi', 'torque_RF_len',
+                'torque_spine_f', 'torque_spine_len', 'torque_spine_phi', 'torque_spine_h',
+                'torque_LH_phi', 'torque_LH_len', 'torque_RH_phi', 'torque_RH_len',
+                'contact_LF','contact_RF','contact_LH','contact_RH',
+                'action_LF_phi', 'action_LF_len', 'action_RF_phi', 'action_RF_len',
+                'action_spine_f', 'action_spine_len', 'action_spine_phi', 'action_spine_h',
+                'action_LH_phi', 'action_LH_len', 'action_RH_phi', 'action_RH_len']
+df=pd.read_csv(filename, header=None, low_memory=False)
+alt=np.array(df)
+
+dt=0.02
+torque_limit=20
+time_length=len(alt)*dt
+if time_length>20:
+    time_length=20
+t=np.zeros(int(time_length/dt-1))
+tau=np.zeros(int(time_length/dt-1))
+
+
+for i in range(int(time_length/dt-1)):
+    t[i]=alt[i+1][0]
+    tau[i]=alt[i+1][1]
+
+figsize=(20, 6)
+figure1, ax = plt.subplots(figsize=figsize)
+plt.subplot(1,1,1)
+plt.plot(t,tau,color='tomato',linewidth=3,linestyle='-',label='x')
+plt.show()

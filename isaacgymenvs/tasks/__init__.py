@@ -27,6 +27,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from .ant import Ant
+from .stray import Stray
+from .stray_terrain import StrayTerrain
+from .stray_reduced import StrayReduced
 from .anymal import Anymal
 from .anymal_terrain import AnymalTerrain
 from .ball_balance import BallBalance
@@ -92,6 +95,9 @@ isaacgym_task_map = {
     "AllegroHandManualDR": AllegroHandDextremeManualDR,
     "AllegroHandADR": AllegroHandDextremeADR,
     "Ant": Ant,
+    "Stray": Stray,
+    "StrayTerrain": StrayTerrain,
+    "StrayReduced": StrayReduced,
     "Anymal": Anymal,
     "AnymalTerrain": AnymalTerrain,
     "BallBalance": BallBalance,

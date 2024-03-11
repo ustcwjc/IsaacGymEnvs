@@ -1,0 +1,218 @@
+<!--stray model
+
+-->
+
+
+<mujoco model='Stray'>
+  <compiler inertiafromgeom='false' angle='degree' eulerseq='xyz'/>
+  <size nuser_actuator='1' nuser_sensor='1'/>
+  <option timestep='0.001' iterations='50' solver='PGS' gravity='0 0 -0.9.806'/>
+  <!-- Timestep is set to 0.001 because our controller runs at 1kHz (-9.806) -->
+  <!-- Larger values still have stable dynamics -->
+    <visual>
+    <quality shadowsize='4096'/>
+    <map znear='0.05'/>
+    </visual>
+
+    <default>
+      <joint limited='true'/>
+      <geom contype='0' conaffinity='0' condim='1' solref=".005 1" solimp=".8 .8 .01" material='collision'/>
+      <equality solref='0.005 1'/>
+      <motor ctrllimited='true'/>
+      <mesh scale='0.001 0.001 0.001'/>
+
+      <default class='mesh-import'>
+          <geom type='mesh' euler='0 90 90' material='cassie'/>
+      </default>
+    </default>
+
+    <asset>
+        <texture type='skybox' builtin='gradient' width='128' height='128' rgb1='0.725490196078431   0.403921568627451   1.000000000000000' rgb2='1.000000000000000   0.984313725490196   0.588235294117647'/>
+        <texture name='plane' type='2d' builtin='checker'  rgb1='0.2 0.3 0.5' rgb2='1 1 1' width='128' height='128'/>
+        <material name='plane' reflectance='0' texture='plane' texrepeat='4 4' texuniform='true'/>
+        <material name='cassie' rgba='0.8921568627451   0.73921568627451   0.9078431372549 1'/>
+        <material name='collision' rgba='0 1 0 0.1'/>
+    </asset>
+
+    <worldbody>
+        <geom type='plane' size='100 100 100' material='plane' condim='3' contype='1' conaffinity='1' friction='1 0.005 0.0001'/>
+        <light name="temp" mode='fixed' castshadow='false' active="true" pos='2 -2 5' exponent='1'/>
+        <body name='front_body' pos='-0.00 0 0.3'>
+            <site name="bodyref" size="0.01"/>
+            <camera name="track" mode="trackcom" pos="0 -3 0.5" xyaxes="1 0 0 0 0 1"/>
+
+            <inertial pos="0.05 0 0" mass="6.53617385" diaginertia="0.12444697 0.07859602 0.18081671" />
+            <geom type='box' size='0.0525 0.2055 0.072' material='cassie' contype='1' conaffinity='1' condim='3' />
+            <geom type='box' size='0.0525 0.2055 0.072' material='cassie' />
+
+            <freejoint name="root" />>
+
+            <!-- LF U -->
+            <body name='LF_U' pos='0.1125 0.1345 -0.015' euler='0 0 0'>
+               <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+               <geom type='box' size='0.06 0.01 0.01' material='cassie'/>
+
+               <!-- lf leg -->
+               <body name='phi_LF' pos='0.06 0 0' euler='0 0 0'>
+                  <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                  <geom type='box' size="0.025 0.02 0.025" euler="0 0 0" material='cassie' contype='1' conaffinity='1' condim='3' />
+                  <geom type='box' size="0.025 0.02 0.025" euler="0 0 0" material='cassie' />
+                  <joint name='phi_LF' type='hinge' pos='0 0 0' axis='0 1 0' range='-90 90' ref='0' armature='0.0001'/>
+                  
+                  <body name="len_LF" pos='0.0 0 -0.1732' euler='0 0 0'>
+                    <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                    <geom type='box' size='0.01 0.01 0.1116' material='cassie' pos="0 0 0.0866" />
+                    <joint name='len_LF' type='slide' pos='0 0 0' axis='0 0 1' range='-0.07 0.07' ref='0' armature='0.0001'/>
+
+                    <body name='foot1' pos='0 0 0' euler='0 0 0'>
+                          <inertial pos="0 0 0" mass="0.01393601" diaginertia="0.00000166 0.00000366 0.00000244" />
+                          <geom type='sphere' size="0.025" contype='1' conaffinity='1' condim='3'/>
+                          <!-- <geom type='sphere' size="0.025" material='cassie'/> -->
+                          
+
+                    </body>
+                  </body>
+
+               </body>
+            </body>
+
+            <!-- RF U -->
+            <body name='RF_U' pos='0.1125 -0.1345 -0.015' euler='0 0 0'>
+               <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+               <geom type='box' size='0.06 0.01 0.01' material='cassie'/>
+
+               <!-- rf leg -->
+               <body name='phi_RF' pos='0.06 0 0' euler='0 0 0'>
+                  <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                  <geom type='box' size="0.025 0.02 0.025" euler="90 0 0" material='cassie' contype='1' conaffinity='1' condim='3'/>
+                  <geom type='box' size="0.025 0.02 0.025" euler="90 0 0" material='cassie' />
+                  <joint name='phi_RF' type='hinge' pos='0 0 0' axis='0 1 0' range='-90 90' ref='0' armature='0.0001'/>
+                  
+                  <body name="len_RF" pos='0.0 0 -0.1732' euler='0 0 0'>
+                    <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                    <geom type='box' size='0.01 0.01 0.1116' material='cassie' pos="0 0 0.0866" />
+                    <joint name='len_RF' type='slide' pos='0 0 0' axis='0 0 1' range='-0.07 0.07' ref='0' armature='0.0001'/>
+
+                    <body name='foot2' pos='0 0 0' euler='0 0 0'>
+                          <inertial pos="0 0 0" mass="0.01393601" diaginertia="0.00000166 0.00000366 0.00000244" />
+                          <geom type='sphere' size="0.025" material='cassie' contype='1' conaffinity='1' condim='3'/>
+                          <!-- <geom type='sphere' size="0.025" material='cassie' /> -->
+
+                    </body>
+                  </body>
+
+               </body>
+            </body>
+
+            <!-- spine_front -->
+            <body name='spine_f' pos='-0.093 0 -0.008' euler='0 0 0'>
+                <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                <geom type='box' size='0.0405 0.02 0.02' euler="0 0 0" material='cassie' contype='1' conaffinity='1' condim='3'/>
+                <geom type='box' size='0.0405 0.02 0.02' euler="0 0 0" material='cassie'/>
+                <joint name='spine_f' type='hinge' pos='0.04425 0 0' axis='1 0 0' range='-180 180' ref='0' armature='0.0001' />
+                
+                <body name='tube' pos='-0.1108118 0 0' euler='0 0 0'>
+                    <inertial pos='0 0 0' mass='0.0000001' diaginertia='0.00001 0.00001 0.00001'/>
+                    <geom type='box' size='0.1 0.01 0.01' material='cassie'/>
+                    <joint name='spine_slide' type='slide' axis='1 0 0' limited='true' ref='0' range='-0.04 0.04'/>
+
+                    <body name='spine_phi_motor' pos='-0.0703118 0 0' euler='0 0 0'>
+                        <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                        <geom type='box' size='0.045 0.02 0.045' euler="0 0 0" material='cassie' />
+
+                        <body name='spine_phi' pos='-0.0 0 0' euler='0 0 0'>
+                            <inertial pos="0 0 0" mass="1.61358221" diaginertia="0.00705558 0.00247344 0.00724607" />
+                            <!-- <geom type='box' size="0.0325 0.0325 0.0325" euler="0 0 0" pos="-0.0325 0 0" material='cassie' contype='1' conaffinity='1' condim='3'/> -->
+                            <geom type='box' size="0.0325 0.0325 0.0325" euler="0 0 0" pos="-0.0325 0 0" material='cassie'/>
+                            <joint name='spine_phi' type='hinge' pos='0 0 0' axis='0 1 0' range='-90 90' ref='0' armature='0.0001'/>
+
+                            <body name='hind_body' pos='-0.122 0 0.008' euler='0 0 0'>
+                                <inertial pos="-0.05 0 0" mass="6.33306601" diaginertia="0.10445130 0.06424537 0.14874071" />
+                                <geom type='box' size='0.057 0.2055 0.072' euler="0 0 0" material='cassie' contype='1' conaffinity='1' condim='3'/>
+                                <geom type='box' size='0.057 0.2055 0.072' euler="0 0 0" material='cassie'/>
+                                <joint name='spine_h' type='hinge' pos='0.057 0 0' axis='1 0 0' range='-180 180' ref='0'  armature='0.0001'/>
+
+                                <!-- LH U -->
+                                <body name='LH_U' pos='-0.117 0.1345 -0.015' euler='0 0 0'>
+                                <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                                <geom type='box' size='0.06 0.01 0.01' material='cassie'/>
+
+                                <!-- lh leg -->
+                                <body name='phi_LH' pos='-0.06 0 0' euler='0 0 0'>
+                                    <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                                    <geom type='box' size="0.025 0.02 0.025" euler="90 0 0" material='cassie' contype='1' conaffinity='1' condim='3'/>
+                                    <geom type='box' size="0.025 0.02 0.025" euler="90 0 0" material='cassie' />
+                                    <joint name='phi_LH' type='hinge' pos='0 0 0' axis='0 1 0' range='-90 90' ref='0' armature='0.0001'/>
+                                    
+                                    <body name="len_LH" pos='0.0 0 -0.1732' euler='0 0 0'>
+                                        <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                                        <geom type='box' size='0.01 0.01 0.1116' material='cassie' pos="0 0 0.0866" />
+                                        <joint name='len_LH' type='slide' pos='0 0 0' axis='0 0 1' range='-0.07 0.07' ref='0' armature='0.0001'/>
+
+                                        <body name='foot3' pos='0 0 0' euler='0 0 0'>
+                                            <inertial pos="0 0 0" mass="0.01393601" diaginertia="0.00000166 0.00000366 0.00000244" />
+                                            <geom type='sphere' size="0.025" material='cassie' contype='1' conaffinity='1' condim='3'/>
+                                            <!-- <geom type='sphere' size="0.025" material='cassie' /> -->
+
+                                        </body>
+                                    </body>
+
+                                </body>
+                                </body>
+
+                                <!-- RH U -->
+                                <body name='RH_U' pos='-0.117 -0.1345 -0.015' euler='0 0 0'>
+                                <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                                <geom type='box' size='0.06 0.01 0.01' material='cassie'/>
+
+                                <!-- rh leg -->
+                                <body name='phi_RH' pos='-0.06 0 0' euler='0 0 0'>
+                                    <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                                    <geom type='box' size="0.025 0.02 0.025" euler="90 0 0" material='cassie' contype='1' conaffinity='1' condim='3'/>
+                                    <geom type='box' size="0.025 0.02 0.025" euler="90 0 0" material='cassie' />
+                                    <joint name='phi_RH' type='hinge' pos='0 0 0' axis='0 1 0' range='-90 90' ref='0' armature='0.0001'/>
+                                    
+                                    <body name="len_RH" pos='0.0 0 -0.1732' euler='0 0 0'>
+                                        <inertial pos='0 0 0' mass='0.00001' diaginertia='0.000000001 0.000000001 0.000000001'/>
+                                        <geom type='box' size='0.01 0.01 0.1116' material='cassie' pos="0 0 0.0866" />
+                                        <joint name='len_RH' type='slide' pos='0 0 0' axis='0 0 1' range='-0.07 0.07' ref='0' armature='0.0001'/>
+
+                                        <body name='foot4' pos='0 0 0' euler='0 0 0'>
+                                            <inertial pos="0 0 0" mass="0.01393601" diaginertia="0.00000166 0.00000366 0.00000244" />
+                                            <geom type='sphere' size="0.025" material='cassie' contype='1' conaffinity='1' condim='3'/>
+                                            <!-- <geom type='sphere' size="0.025" material='cassie' /> -->
+
+                                        </body>
+                                    </body>
+
+                                </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+
+        
+
+    </worldbody>
+    
+    <actuator>
+        <motor name="phi_LF" ctrllimited='true' ctrlrange='-60 60' joint='phi_LF' gear='1'/>
+        <motor name="len_LF" ctrllimited='true' ctrlrange='-600 600' joint='len_LF' gear='1'/>
+        <motor name="phi_RF" ctrllimited='true' ctrlrange='-60 60' joint='phi_RF' gear='1'/>
+        <motor name="len_RF" ctrllimited='true' ctrlrange='-600 600' joint='len_RF' gear='1'/>
+        <motor name="spine_f" ctrllimited='true' ctrlrange='-30 30' joint='spine_f' gear='1'/>
+        <motor name="spine_slide" ctrllimited='true' ctrlrange='-400 400' joint='spine_slide' gear='1'/>
+        <motor name="spine_phi" ctrllimited='true' ctrlrange='-60 60' joint='spine_phi' gear='1'/>
+        <motor name="spine_h" ctrllimited='true' ctrlrange='-30 30' joint='spine_h' gear='1'/>
+        <motor name="phi_LH" ctrllimited='true' ctrlrange='-60 60' joint='phi_LH' gear='1'/>
+        <motor name="len_LH" ctrllimited='true' ctrlrange='-600 600' joint='len_LH' gear='1'/>
+        <motor name="phi_RH" ctrllimited='true' ctrlrange='-60 60' joint='phi_RH' gear='1'/>
+        <motor name="len_RH" ctrllimited='true' ctrlrange='-600 600' joint='len_RH' gear='1'/>
+    </actuator>&gt;
+
+ 
+
+</mujoco>

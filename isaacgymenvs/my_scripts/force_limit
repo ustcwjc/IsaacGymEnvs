@@ -1,0 +1,45 @@
+import pandas as pd
+import numpy as np
+from mpl_toolkits.axisartist.axislines import SubplotZero
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+from matplotlib.lines import Line2D
+import matplotlib.pyplot as plt
+from scipy.interpolate import make_interp_spline
+import math
+import matplotlib.ticker as ticker
+
+l1=0.1
+l2=0.2
+phi1=np.zeros(30)
+phi2=np.zeros(30)
+tau1=np.zeros(30)
+tau2=np.zeros(30)
+F=np.zeros(30*30*30*30)
+for i in range(30):
+    phi1[i]=2.1*(i+1)/30
+    phi2[i]=2.1*(i+1)/30
+    tau1[i]=-30+2*i
+    tau2[i]=-30+2*i
+print("phi1: ",phi1)
+print("phi2: ",phi2)
+print("tau1: ",tau1)
+print("tau2: ",tau2)
+for i in range(30):
+    for j in range(30):
+        for k in range(30):
+            for l in range(30):
+                J11=-0.5*l1*np.sin(0.5*(phi1[i]+phi2[j]))-l1*l1*np.sin(0.5*(phi1[i]+phi2[j]))*np.cos(0.5*(phi1[i]+phi2[j]))/(2*np.sqrt(l2*l2-l1*l1*np.sin(0.5*(phi1[i]+phi2[j]))*np.sin(0.5*(phi1[i]+phi2[j]))))
+                if J11==0:
+                    F[i*30*30*30+j*30*30+k*30+l]=0
+                else:
+                    F[i*30*30*30+j*30*30+k*30+l]=(tau1[k]+tau2[l])/(2*J11)
+print("F_min: ",np.min(F))
+print("F_max: ",np.max(F))
+print("F_mean: ",np.mean(F))
+phi1=0.785
+phi2=0.785
+tau1=-30
+tau2=-30
+J11=-0.5*l1*np.sin(0.5*(phi1+phi2))-l1*l1*np.sin(0.5*(phi1+phi2))*np.cos(0.5*(phi1+phi2))/(2*np.sqrt(l2*l2-l1*l1*np.sin(0.5*(phi1+phi2))*np.sin(0.5*(phi1+phi2))))
+F=(tau1+tau2)/(2*J11)
+print("F: ",F)

@@ -1,0 +1,196 @@
+# used to create the object
+name: StrayReduced
+
+physics_engine: 'physx'
+
+env:
+  numEnvs: 1
+  numObservations: 46
+  numActions: 12
+  envSpacing: 1.  # [m]
+  enableDebugVis: False
+
+  terrain:
+    terrainType: plane # none, plane, or trimesh
+    staticFriction: 1.0  # [-]
+    dynamicFriction: 1.0  # [-]
+    restitution: 0.        # [-]
+    # rough terrain only:
+    curriculum: true
+    maxInitMapLevel: 0
+    mapLength: 8.
+    mapWidth: 8.
+    numLevels: 10
+    numTerrains: 4
+    # terrain types: [smooth slope, rough slope, stairs up, stairs down, discrete]
+    terrainProportions: [0.0, 0.8, 0.0, 0.1, 0.2]
+    # tri mesh only:
+    slopeTreshold: 0.35 # [rad]
+
+  baseInitState:
+    pos: [0.0, 0.0, 0.25] # x,y,z [m]
+    rot: [0.0, 0.0, 0.0, 1.0] # x,y,z,w [quat]
+    vLinear: [0.0, 0.0, 0.0]  # x,y,z [m/s]
+    vAngular: [0.0, 0.0, 0.0]  # x,y,z [rad/s]
+    base_height_des: 0.3 # [m]
+
+  randomCommandVelocityRanges:
+    # train
+    linear_x: [1.0, 1.1] # min max [m/s]
+    linear_y: [-0.01, 0.01]   # min max [m/s]
+    yaw: [-3.14, -3.13]    # min max [rad/s]
+
+  control:
+    # PD Drive parameters:
+    Kp_leg_phi_sw: 30  # [Nm/rad]
+    Kd_leg_phi_sw: 1  # [Nm/(rad/s)]
+    Kp_leg_len_sw: 200  # [Nm/m]
+    Kd_leg_len_sw: 5  # [Nm/(m/s)]
+    Kp_leg_phi_st: 60  # [Nm/rad]
+    Kd_leg_phi_st: 1.5  # [Nm/(rad/s)]
+    Kp_leg_len_st: 2500  # [Nm/m]
+    Kd_leg_len_st: 50  # [Nm/(m/s)]
+    Kp_spine_phi: 200  # [Nm/rad]
+    Kd_spine_phi: 5  # [Nm/(rad/s)]
+    Kp_spine_len: 2500  # [Nm/m]
+    Kd_spine_len: 50  # [Nm/(m/s)]
+    # action scale: target angle = actionScale * action + defaultAngle
+    actionScale_phi_leg: 0.2  # [rad]
+    actionScale_phi_spine: 0.2  # [rad]
+    actionScale_len_leg: 0.02  # [m]
+    actionScale_len_spine: 0.02  # [m]
+    # decimation: Number of control action updates @ sim DT per policy DT
+    decimation: 20
+    feetAirTimeDesired: 0.3 # [s]
+    gaitpattern: 0  # 0 is trot, 1 is bound, 2 is pace, 3 is gallop, 4 is flyingtrot
+    spine_horizontal: True
+
+
+  defaultJointAngles:  # = target angles when action = 0.0
+    phi_LF: 0.0  # [rad]
+    len_LF: 0.0  # [m]
+    phi_RF: 0.0  # [rad]
+    len_RF: 0.0  # [m]
+    spine_f: 0.0  # [rad]
+    spine_slide: 0.0  # [m]
+    spine_phi: 0.0  # [rad]
+    spine_h: 0.0  # [rad]
+    phi_LH: 0.0  # [rad]
+    len_LH: 0.0  # [m]
+    phi_RH: 0.0  # [rad]
+    len_RH: 0.0  # [m]
+
+  mjcfAsset:
+    file: "mjcf/stray_reduced.xml"
+    footName: foot # SHANK if collapsing fixed joint, FOOT otherwise
+    calfName: len
+    thighName: phi_
+    collapseFixedJoints: True
+    fixBaseLink: false
+    defaultDofDriveMode: 4 # see GymDofDriveModeFlags (0 is none, 1 is pos tgt, 2 is vel tgt, 4 effort)
+
+  learn:
+    allowcalfContacts: True
+    # rewards
+    terminalReward: 0
+    linearVelocityXYRewardScale: 1.0
+    linearVelocityZRewardScale: -0.0 #-1.0
+    angularVelocityXYRewardScale: -0.05 #-0.05
+    angularVelocityZRewardScale: 0.5
+    orientationRewardScale: -0.0 #-1.
+    torqueRewardScale: -0.0001 # -0.000025
+    jointAccRewardScale: -0.0000025 # -0.0025
+    baseHeightRewardScale: -0.0 # -5
+    feetAirTimeRewardScale:  -0.0
+    calfCollisionRewardScale: -0.0
+    feetStumbleRewardScale: -2.0 #-2.0
+    actionRateRewardScale: -0.05
+    gaitpatternRewardScale: 0.5
+    powerRewardScale: -0.000
+    spineRewardScale: -0.5
+    allfeetonairRewardScale: -0.
+    # cosmetics
+    hipRewardScale: -0.0 #25
+    thighRewardScale: -0.0 #25
+    kneeRewardScale: -0.0 #25
+
+    # normalization
+    linearVelocityScale: 2.0
+    angularVelocityScale: 0.25
+    dofPositionScale: 1.0
+    dofVelocityScale: 0.05
+    heightMeasurementScale: 5.0
+
+    # noise 
+    addNoise: true
+    noiseLevel: 1.0 # scales other values
+    dofPositionNoise: 0.01
+    dofVelocityNoise: 1.5
+    linearVelocityNoise: 0.1
+    angularVelocityNoise: 0.2
+    gravityNoise: 0.05
+    heightMeasurementNoise: 0.06
+
+    #randomization
+    randomizeFriction: true
+    frictionRange: [0.5, 1.25]
+    pushRobots: true
+    pushInterval_s: 15
+    turning_s: 10
+
+    # episode length in seconds
+    episodeLength_s: 20
+
+  # viewer cam:
+  viewer:
+    refEnv: 0
+    pos: [-0.3, -1.0, 0.3]  # [m]
+    lookat: [0., 0, 0.31]  # [m]
+
+  # set to True if you use camera sensors in the environment
+  enableCameraSensors: False
+
+sim:
+  dt: 0.001
+  substeps: 2
+  up_axis: "z"
+  use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
+  gravity: [0.0, 0.0, -9.81]
+  physx:
+    num_threads: ${....num_threads}
+    solver_type: ${....solver_type}
+    use_gpu: ${contains:"cuda",${....sim_device}} # set to False to run on CPU
+    num_position_iterations: 4
+    num_velocity_iterations: 1
+    contact_offset: 0.02
+    rest_offset: 0.0
+    bounce_threshold_velocity: 0.2
+    max_depenetration_velocity: 100.0
+    default_buffer_size_multiplier: 5.0
+    max_gpu_contact_pairs: 8388608 # 8*1024*1024
+    num_subscenes: ${....num_subscenes}
+    contact_collection: 1 # 0: CC_NEVER (don't collect contact info), 1: CC_LAST_SUBSTEP (collect only contacts on last substep), 2: CC_ALL_SUBSTEPS (broken - do not use!)
+
+task:
+  randomize: False
+  randomization_params:
+    # specify which attributes to randomize for each actor type and property
+    frequency: 500   # Define how many environment steps between generating new randomizations
+    observations:
+      range: [0, .002] # range for the white noise
+      operation: "additive"
+      distribution: "gaussian"
+    actions:
+      range: [0., .02]
+      operation: "additive"
+      distribution: "gaussian"
+    actor_params:
+      stray:
+        color: True
+        rigid_body_properties:
+          mass: 
+            range: [0.5, 1.5]
+            operation: "scaling"
+            distribution: "uniform"
+            setup_only: True # Property will only be randomized once before simulation is started. See Domain Randomization Documentation for more info.
+

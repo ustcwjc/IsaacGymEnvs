@@ -1,0 +1,329 @@
+import csv  # 导入csv模块
+import pandas as pd
+import numpy as np
+from mpl_toolkits.axisartist.axislines import SubplotZero
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+from matplotlib.lines import Line2D
+import matplotlib.pyplot as plt
+from scipy.interpolate import make_interp_spline
+import math
+import matplotlib.ticker as ticker
+
+
+
+filename = '/home/wong/anaconda3/envs/mujoco-gym/lib/python3.8/site-packages/IsaacGymEnvs/isaacgymenvs/data/temp.csv'
+header=['lin_vel_x','lin_vel_y','lin_vel_z','ang_vel_x','ang_vel_y','ang_vel_z', 'command_x', 'command_y', 'command_yaw',
+                'torque_hip_LF','torque_thigh_LF','torque_knee_LF','torque_hip_RF','torque_thigh_RF','torque_knee_RF',
+                'torque_spine_roll','torque_spine_pitch',
+                'torque_hip_LH','torque_thigh_LH','torque_knee_LH','torque_hip_RH','torque_thigh_RH','torque_knee_RH',
+                'contact_LF','contact_RF','contact_LH','contact_RH']
+df=pd.read_csv(filename, header=None)
+alt=np.array(df)
+
+dt=0.005
+torque_limit=20
+time_length=len(alt)*dt
+if time_length>20:
+    time_length=20
+t=np.zeros(int(time_length/dt-1))
+v_x=np.zeros(int(time_length/dt-1))
+v_y=np.zeros(int(time_length/dt-1))
+v_z=np.zeros(int(time_length/dt-1))
+yaw_x=np.zeros(int(time_length/dt-1))
+yaw_y=np.zeros(int(time_length/dt-1))
+yaw_z=np.zeros(int(time_length/dt-1))
+torque_hip_LF=np.zeros(int(time_length/dt-1))
+torque_thigh_LF=np.zeros(int(time_length/dt-1))
+torque_knee_LF=np.zeros(int(time_length/dt-1))
+torque_hip_RF=np.zeros(int(time_length/dt-1))
+torque_thigh_RF=np.zeros(int(time_length/dt-1))
+torque_knee_RF=np.zeros(int(time_length/dt-1))
+torque_spine_roll=np.zeros(int(time_length/dt-1))
+torque_spine_pitch=np.zeros(int(time_length/dt-1))
+torque_hip_LH=np.zeros(int(time_length/dt-1))
+torque_thigh_LH=np.zeros(int(time_length/dt-1))
+torque_knee_LH=np.zeros(int(time_length/dt-1))
+torque_hip_RH=np.zeros(int(time_length/dt-1))
+torque_thigh_RH=np.zeros(int(time_length/dt-1))
+torque_knee_RH=np.zeros(int(time_length/dt-1))
+contact_LF=np.zeros(int(time_length/dt-1))
+contact_RF=np.zeros(int(time_length/dt-1))
+contact_LH=np.zeros(int(time_length/dt-1))
+contact_RH=np.zeros(int(time_length/dt-1))
+
+for i in range(int(time_length/dt-1)):
+    t[i]=dt*i
+    v_x[i]=alt[i+1][0]
+    v_y[i]=alt[i+1][1]
+    v_z[i]=alt[i+1][2]
+    yaw_x[i]=alt[i+1][3]
+    yaw_y[i]=alt[i+1][4]
+    yaw_z[i]=alt[i+1][5]
+    torque_hip_LF[i]=alt[i+1][9]
+    torque_thigh_LF[i]=alt[i+1][10]
+    torque_knee_LF[i]=alt[i+1][11]
+    torque_hip_RF[i]=alt[i+1][12]
+    torque_thigh_RF[i]=alt[i+1][13]
+    torque_knee_RF[i]=alt[i+1][14]
+    torque_spine_roll[i]=alt[i+1][15]
+    torque_spine_pitch[i]=alt[i+1][16]
+    torque_hip_LH[i]=alt[i+1][17]
+    torque_thigh_LH[i]=alt[i+1][18]
+    torque_knee_LH[i]=alt[i+1][19]
+    torque_hip_RH[i]=alt[i+1][20]
+    torque_thigh_RH[i]=alt[i+1][21]
+    torque_knee_RH[i]=alt[i+1][22]
+    contact_LF[i]=alt[i+1][23]
+    contact_RF[i]=alt[i+1][24]
+    contact_LH[i]=alt[i+1][25]
+    contact_RH[i]=alt[i+1][26]
+
+mean_v_x=np.mean(v_x)
+mean_yaw_z=np.mean(yaw_z)
+################plot#####################
+figsize=(20, 6)
+figure1, ax = plt.subplots(figsize=figsize)
+plt.subplot(1,2,1)
+plt.plot(t,v_x,color='tomato',linewidth=3,linestyle='-',label='x')
+plt.axvline(x=15, color='royalblue', linewidth=1.5, linestyle='--')
+plt.axhline(y=mean_v_x, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(4))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+plt.xlabel('time/s',fontsize=15)
+plt.ylabel('v_x/m',    fontsize=15)
+
+
+plt.subplot(1,2,2)
+plt.plot(t,yaw_z,color='tomato',linewidth=3,linestyle='-',label='yaw')
+plt.axvline(x=15, color='royalblue', linewidth=1.5, linestyle='--')
+plt.axhline(y=mean_yaw_z, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(4))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(0.4))
+plt.xlabel('time/s',fontsize=15)
+plt.ylabel('yaw_z/(rad/s)',    fontsize=15)
+
+plt.suptitle('mean_v_x='+str(round(mean_v_x,3))+'m/s  mean_yaw_z='+str(round(mean_yaw_z,3))+'rad/s', fontsize=25)
+
+plt.show()
+
+figsize=(20, 6)
+figure2, ax = plt.subplots(figsize=figsize)
+plt.subplot(2,7,1)
+plt.plot(t,torque_hip_LF,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(4))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+plt.xlabel('time/s',fontsize=15)
+plt.ylabel('torque/N·m',    fontsize=15)
+plt.title('torque_hip_LF', fontsize=15)
+
+plt.subplot(2,7,2)
+plt.plot(t,torque_thigh_LF,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(4))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_thigh_LF', fontsize=15)
+
+plt.subplot(2,7,3)
+plt.plot(t,torque_knee_LF,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(4))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_knee_LF', fontsize=15)
+
+plt.subplot(2,7,4)
+plt.plot(t,torque_hip_RF,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(4))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_hip_RF', fontsize=15)
+
+plt.subplot(2,7,5)
+plt.plot(t,torque_thigh_RF,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(4))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_thigh_RF', fontsize=15)
+
+plt.subplot(2,7,6)
+plt.plot(t,torque_knee_RF,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+ax.xaxis.set_major_locator(ticker.MultipleLocator(4))
+ax.yaxis.set_major_locator(ticker.MultipleLocator(0.2))
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_knee_RF', fontsize=15)
+
+plt.subplot(2,7,7)
+plt.plot(t,torque_spine_roll,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_spine_roll', fontsize=15)
+
+plt.subplot(2,7,8)
+plt.plot(t,torque_spine_pitch,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel('time/s',fontsize=15)
+plt.ylabel('torque/N·m',    fontsize=15)
+plt.title('torque_spine_yaw', fontsize=15)
+
+plt.subplot(2,7,9)
+plt.plot(t,torque_hip_LH,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_hip_LH', fontsize=15)
+
+plt.subplot(2,7,10)
+plt.plot(t,torque_thigh_LH,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_thigh_LH', fontsize=15)
+
+plt.subplot(2,7,11)
+plt.plot(t,torque_knee_LH,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_knee_LH', fontsize=15)
+
+plt.subplot(2,7,12)
+plt.plot(t,torque_hip_RH,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_hip_RH', fontsize=15)
+
+plt.subplot(2,7,13)
+plt.plot(t,torque_thigh_RH,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_thigh_RH', fontsize=15)
+
+plt.subplot(2,7,14)
+plt.plot(t,torque_knee_RH,color='tomato',linewidth=1,linestyle='-',label='x')
+plt.axhline(y=torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.axhline(y=-torque_limit, color='b', linewidth=1.5, linestyle='--')
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel('time/s',fontsize=15)
+plt.title('torque_knee_RH', fontsize=15)
+
+plt.show()
+
+################plot_contact#####################
+# for i in range(len(contact_LF)):
+#     if contact_LF[i]==0:
+#         contact_LF[i]=np.nan
+#     else:
+#         contact_LF[i]=2
+#     if contact_RF[i]==0:
+#         contact_RF[i]=np.nan
+#     else:
+#         contact_RF[i]=1.5
+#     if contact_LH[i]==0:
+#         contact_LH[i]=np.nan
+#     else:
+#         contact_LH[i]=1
+#     if contact_RH[i]==0:
+#         contact_RH[i]=np.nan
+#     else:
+#         contact_RH[i]=0.5
+
+figsize=(20, 6)
+figure3, ax = plt.subplots(figsize=figsize)
+for i in range(len(contact_LF)):
+    if contact_LF[i]==0:
+        contact_LF[i]=np.nan
+    else:
+        contact_LF[i]=3.9
+    if contact_RF[i]==0:
+        contact_RF[i]=np.nan
+    else:
+        contact_RF[i]=2.9
+    if contact_LH[i]==0:
+        contact_LH[i]=np.nan
+    else:
+        contact_LH[i]=1.9
+    if contact_RH[i]==0:
+        contact_RH[i]=np.nan
+    else:
+        contact_RH[i]=0.9
+
+color_LF = 'cornflowerblue'
+color_RF = 'cornflowerblue'
+color_LH = 'cornflowerblue'
+color_RH = 'cornflowerblue'
+plt.subplot(1,1,1)
+
+start_time=5
+time_length=1
+end_time=start_time+time_length
+
+ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+plt.fill_between(t, 3.1, contact_LF, color=color_LF, alpha=1)
+plt.fill_between(t, 2.1, contact_RF, color=color_RF, alpha=1)
+plt.fill_between(t, 1.1, contact_LH, color=color_LH, alpha=1)
+plt.fill_between(t, 0.1, contact_RH, color=color_RH, alpha=1)
+linewidth_gait = 2
+# plt.axhline(y=3.1, color=color_LF, linewidth=linewidth_gait, linestyle='-', alpha=0.5)
+# plt.axhline(y=2.1, color=color_RF, linewidth=linewidth_gait, linestyle='-', alpha=0.5)
+# plt.axhline(y=1.1, color=color_LH, linewidth=linewidth_gait, linestyle='-', alpha=0.5)
+# plt.axhline(y=0.1, color=color_RH, linewidth=linewidth_gait, linestyle='-', alpha=0.5)
+# plt.axhline(y=3.9, color=color_LF, linewidth=linewidth_gait, linestyle='-', alpha=0.5)
+# plt.axhline(y=2.9, color=color_RF, linewidth=linewidth_gait, linestyle='-', alpha=0.5)
+# plt.axhline(y=1.9, color=color_LH, linewidth=linewidth_gait, linestyle='-', alpha=0.5)
+# plt.axhline(y=0.9, color=color_RH, linewidth=linewidth_gait, linestyle='-', alpha=0.5)
+# plt.grid(axis='x',linestyle='-', linewidth=0.5, alpha=0.5, which='major')
+plt.xticks(fontsize=12)
+plt.yticks([0.5,1.5,2.5,3.5], ['RH','LH','RF','LF'],fontsize=30)
+plt.ylim(0,4)
+plt.xlim(start_time,end_time)
+plt.xlabel('time/s',fontsize=15)
+plt.title('contact', fontsize=15)
+
+
+plt.show()

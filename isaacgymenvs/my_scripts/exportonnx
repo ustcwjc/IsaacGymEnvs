@@ -1,0 +1,78 @@
+
+import logging
+import os
+from datetime import datetime
+
+    # noinspection PyUnresolvedReferences
+import isaacgym
+from isaacgymenvs.pbt.pbt import PbtAlgoObserver, initial_pbt_check
+from isaacgymenvs.utils.rlgames_utils import multi_gpu_get_rank
+from hydra.utils import to_absolute_path
+from isaacgymenvs.tasks import isaacgym_task_map
+import gym
+from isaacgymenvs.utils.reformat import omegaconf_to_dict, print_dict
+from isaacgymenvs.utils.utils import set_np_formatting, set_seed
+from isaacgymenvs.utils.rlgames_utils import RLGPUEnv, RLGPUAlgoObserver, MultiObserver, ComplexObsRLGPUEnv
+from isaacgymenvs.utils.wandb_utils import WandbAlgoObserver
+from rl_games.common import env_configurations, vecenv
+from rl_games.torch_runner import Runner
+from rl_games.algos_torch import model_builder
+from isaacgymenvs.learning import amp_continuous
+from isaacgymenvs.learning import amp_players
+from isaacgymenvs.learning import amp_models
+from isaacgymenvs.learning import amp_network_builder
+import isaacgymenvs
+
+from rl_games.torch_runner import Runner
+import os
+import yaml
+import torch
+import matplotlib.pyplot as plt
+import gym
+from IPython import display
+import numpy as np
+import onnx
+import onnxruntime as ort
+
+
+runner=Runner()
+runner.load_config('runs/StrayReduced_09-11-18-33/config.yaml')
+
+class ModelWrapper(torch.nn.Module):
+    '''
+    Main idea is to ignore outputs which we don't need from model
+    '''
+    def __init__(self, model):
+        torch.nn.Module.__init__(self)
+        self._model = model
+        
+        
+    def forward(self,input_dict):
+        input_dict['obs'] = self._model.norm_obs(input_dict['obs'])
+        '''
+        just model export doesn't work. Looks like onnx issue with torch distributions
+        thats why we are exporting only neural network
+        '''
+        #print(input_dict)
+        #output_dict = self._model.a2c_network(input_dict)
+        #input_dict['is_train'] = False
+        #return output_dict['logits'], output_dict['values']
+        return self._model.a2c_network(input_dict)
+    
+agent = runner.create_player()
+agent.restore('runs/StrayReduced_09-11-18-33/nn/StrayReduced.pth')
+agent.init_rnn()
+import rl_games.algos_torch.flatten as flatten
+inputs = {
+    'obs' : torch.zeros((1,) + agent.obs_shape).to(agent.device),
+    'rnn_states' : agent.states,
+}
+with torch.no_grad():
+    adapter = flatten.TracingAdapter(ModelWrapper(agent.model), inputs, allow_non_tensor=True)
+    traced = torch.jit.trace(adapter, adapter.flattened_inputs, check_trace=False)
+    flattened_outputs = traced(*adapter.flattened_inputs)
+
+'''
+we are using two states : ('out_state', 'hidden_state') because it is a lstm
+'''
+torch.onnx.export(traced, adapter.flattened_inputs, "StrayReduced.onnx", verbose=True, input_names=['obs', 'out_state', 'hidden_state'], output_names=['mu','log_std', 'value', 'out_state', 'hidden_state'])
