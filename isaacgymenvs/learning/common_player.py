@@ -34,6 +34,27 @@ from rl_games.algos_torch.running_mean_std import RunningMeanStd
 from rl_games.common.player import BasePlayer
 
 
+class ModelWrapper(torch.nn.Module):
+    '''
+    Main idea is to ignore outputs which we don't need from model
+    '''
+    def __init__(self, model):
+        torch.nn.Module.__init__(self)
+        self._model = model
+        
+        
+    def forward(self,input_dict):
+        input_dict['obs'] = self._model.norm_obs(input_dict['obs'])
+        '''
+        just model export doesn't work. Looks like onnx issue with torch distributions
+        thats why we are exporting only neural network
+        '''
+        #print(input_dict)
+        #output_dict = self._model.a2c_network(input_dict)
+        #input_dict['is_train'] = False
+        #return output_dict['logits'], output_dict['values']
+        return self._model.a2c_network(input_dict)
+
 class CommonPlayer(players.PpoPlayerContinuous):
 
     def __init__(self, params):
@@ -52,6 +73,7 @@ class CommonPlayer(players.PpoPlayerContinuous):
         return
 
     def run(self):
+        checkpoint=self.checkpoint_to_load
         n_games = self.games_num
         render = self.render_env
         n_game_life = self.n_game_life
@@ -143,11 +165,34 @@ class CommonPlayer(players.PpoPlayerContinuous):
                     if batch_size//self.num_agents == 1 or games_played >= n_games:
                         break
 
-        print(sum_rewards)
+        print("sum_rewards: ", sum_rewards)
+        ######################export ONNX############################
+        self.restore(checkpoint)
+        self.init_rnn()
+        import rl_games.algos_torch.flatten as flatten
+        inputs = {
+            'obs' : torch.zeros((1,) + self.obs_shape).to(self.device),
+            'rnn_states' : self.states,
+        }
+        with torch.no_grad():
+            adapter = flatten.TracingAdapter(ModelWrapper(self.model), inputs, allow_non_tensor=True)
+            traced = torch.jit.trace(adapter, adapter.flattened_inputs, check_trace=False)
+            flattened_outputs = traced(*adapter.flattened_inputs)
+
+        '''
+        we are using two states : ('out_state', 'hidden_state') because it is a lstm
+        '''
+        torch.onnx.export(traced, adapter.flattened_inputs, "StrayReduced.onnx",
+                            opset_version = 11,
+                            verbose=True, 
+                            input_names=['obs', 'out_state', 'hidden_state'], 
+                            output_names=['mu','log_std', 'value', 'out_state', 'hidden_state'])
+        print("Exported ONNX model to StrayReduced.onnx")
+        #############################################################
         if print_game_res:
-            print('av reward:', sum_rewards / games_played * n_game_life, 'av steps:', sum_steps / games_played * n_game_life, 'winrate:', sum_game_res / games_played * n_game_life)
+            print('average reward:', sum_rewards / games_played * n_game_life, 'average steps:', sum_steps / games_played * n_game_life, 'winrate:', sum_game_res / games_played * n_game_life)
         else:
-            print('av reward:', sum_rewards / games_played * n_game_life, 'av steps:', sum_steps / games_played * n_game_life)
+            print('average reward:', sum_rewards / games_played * n_game_life, 'average steps:', sum_steps / games_played * n_game_life)
 
         return
 
