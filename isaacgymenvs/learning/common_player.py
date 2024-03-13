@@ -74,6 +74,7 @@ class CommonPlayer(players.PpoPlayerContinuous):
 
     def run(self):
         checkpoint=self.checkpoint_to_load
+        print("Running the model to export ONNX")
         n_games = self.games_num
         render = self.render_env
         n_game_life = self.n_game_life
