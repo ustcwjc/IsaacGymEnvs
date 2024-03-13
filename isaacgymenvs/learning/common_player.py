@@ -190,7 +190,7 @@ class CommonPlayer(players.PpoPlayerContinuous):
         print("Exported ONNX model to StrayReduced.onnx")
         #############################################################
         if print_game_res:
-            print('average_reward:', sum_rewards / games_played * n_game_life, 'average_steps:', sum_steps / games_played * n_game_life, 'winrate:', sum_game_res / games_played * n_game_life)
+            print('average reward:', sum_rewards / games_played * n_game_life, 'average steps:', sum_steps / games_played * n_game_life, 'winrate:', sum_game_res / games_played * n_game_life)
         else:
             print('average reward:', sum_rewards / games_played * n_game_life, 'average steps:', sum_steps / games_played * n_game_life)
 
